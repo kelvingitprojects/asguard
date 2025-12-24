@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [postgis, timescaledb]
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  taxis Taxi[]
+}
+
+model Taxi {
+  id        Int      @id @default(autoincrement())
+  plate     String   @unique
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   Int
+  // Pings are stored in a separate hypertable managed by TimescaleDB/Raw SQL
+  // but we might want a relation or just loose coupling.
+  // For high performance, we often decouple or use a view.
+}
+
+// We can define the Ping model here for type safety if we want to use Prisma for reading sometimes,
+// but the prompt says "bypasses Prisma" for ingestion.
+model Ping {
+  time        DateTime @default(now())
+  sentinel_id Int
+  latitude    Float
+  longitude   Float
+  speed       Float?
+  heading     Float?
+  
+  @@id([time, sentinel_id]) // TimescaleDB requires time in primary key usually
+}

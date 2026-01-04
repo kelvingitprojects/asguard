@@ -10,7 +10,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@config-plugins/react-native-ble-plx": "^7.0.0",
     "@expo/vector-icons": "^15.0.3",
     "@nozbe/watermelondb": "^0.27.0",
     "@react-navigation/bottom-tabs": "^7.9.0",

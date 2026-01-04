@@ -7,16 +7,16 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 /**
  * AlertItem Molecule
- * Displays an alert in a list with enterprise styling
+ * Displays an alert in a list
  */
 export const AlertItem = ({ type, title, message, time, isNew, onPress }) => {
   const getIcon = () => {
     switch (type) {
-      case 'theft': return 'alert-circle-outline';
-      case 'movement': return 'car-sport-outline';
-      case 'maintenance': return 'battery-dead-outline';
-      case 'update': return 'thumbs-up-outline';
-      default: return 'information-circle-outline';
+      case 'theft': return 'alert-circle';
+      case 'movement': return 'car';
+      case 'maintenance': return 'construct'; // or battery-dead
+      case 'update': return 'thumbs-up';
+      default: return 'information-circle';
     }
   };
 
@@ -30,28 +30,19 @@ export const AlertItem = ({ type, title, message, time, isNew, onPress }) => {
     }
   };
 
-  const color = getColor();
-
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.wrapper}>
-      <View style={styles.container}>
-        {/* Left Color Block */}
-        <View style={[styles.iconBox, { backgroundColor: color }]}>
-          <Ionicons name={getIcon()} size={28} color="#fff" />
+      <View style={[styles.container, { borderLeftColor: getColor() }]}>
+        <View style={[styles.iconBox, { backgroundColor: getColor() }]}>
+          <Ionicons name={getIcon()} size={24} color="#fff" />
         </View>
-
-        {/* Right Content */}
         <View style={styles.content}>
-          <View style={styles.headerRow}>
-            <Typography variant="body" style={[styles.title, { color: color }]}>
-              {type === 'theft' ? 'THEFT ALERT:' : 
-               type === 'movement' ? 'MOVEMENT ALERT' :
-               type === 'maintenance' ? 'MAINTENANCE:' :
-               type === 'update' ? 'UPDATE:' : 'INFO:'}
+          <View style={styles.header}>
+            <Typography variant="body" style={{ fontWeight: 'bold', color: '#fff' }}>
+              {type === 'theft' ? 'THEFT ALERT' : type.toUpperCase() + ' ALERT'}
             </Typography>
-            <Typography variant="caption" style={styles.time}>{time}</Typography>
+            <Typography variant="caption" color="secondary">{time}</Typography>
           </View>
-          
           <Typography variant="body" style={styles.message} numberOfLines={3}>
             {message}
           </Typography>
@@ -64,45 +55,31 @@ export const AlertItem = ({ type, title, message, time, isNew, onPress }) => {
 const styles = StyleSheet.create({
   wrapper: {
     marginBottom: theme.spacing.m,
-    ...theme.shadows.small,
   },
   container: {
     flexDirection: 'row',
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.m,
     overflow: 'hidden',
-    minHeight: 100,
+    borderLeftWidth: 4,
   },
   iconBox: {
-    width: 80,
+    width: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
     flex: 1,
     padding: theme.spacing.m,
-    justifyContent: 'center',
   },
-  headerRow: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: theme.spacing.xs,
   },
-  title: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    flex: 1,
-    marginRight: theme.spacing.s,
-  },
-  time: {
-    color: theme.colors.text.secondary,
-    fontSize: 12,
-  },
   message: {
-    color: theme.colors.text.primary,
+    color: theme.colors.text.secondary,
     fontSize: 14,
-    lineHeight: 20,
   },
 });
 

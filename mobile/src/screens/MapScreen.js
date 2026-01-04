@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import MapView, { Marker, Circle } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme';
 import { Typography } from '../components/atoms/Typography';
@@ -11,8 +11,7 @@ import Animated, {
   useAnimatedStyle, 
   withRepeat, 
   withTiming, 
-  withSequence,
-  Easing
+  withSequence 
 } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
@@ -107,103 +106,110 @@ const DarkMapStyle = [
   }
 ];
 
-export const MapScreen = ({ navigation }) => {
-  const rippleScale = useSharedValue(1);
-  const rippleOpacity = useSharedValue(0.6);
+const RadarRing = ({ delay }) => {
+  const scale = useSharedValue(0);
+  const opacity = useSharedValue(1);
 
   useEffect(() => {
-    rippleScale.value = withRepeat(
-      withTiming(3, { duration: 2000, easing: Easing.out(Easing.ease) }),
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(4, { duration: 2000 }),
+        withTiming(0, { duration: 0 })
+      ),
       -1,
       false
     );
-    rippleOpacity.value = withRepeat(
-      withTiming(0, { duration: 2000, easing: Easing.out(Easing.ease) }),
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0, { duration: 2000 }),
+        withTiming(1, { duration: 0 })
+      ),
       -1,
       false
     );
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: rippleScale.value }],
-      opacity: rippleOpacity.value,
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.radarRing, animatedStyle]} />
+  );
+};
+
+export const MapScreen = ({ navigation }) => {
+  const initialRegion = {
+    latitude: -25.7479, // Pretoria
+    longitude: 28.2293,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.0121,
+  };
 
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         customMapStyle={DarkMapStyle}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={{
-          latitude: -25.5414, // Soshanguve approx
-          longitude: 28.1020,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.0121,
-        }}
+        initialRegion={initialRegion}
       >
-        {/* Main Target Car */}
-        <Marker coordinate={{ latitude: -25.5414, longitude: 28.1020 }}>
+        <Marker coordinate={{ latitude: -25.7479, longitude: 28.2293 }}>
           <View style={styles.markerContainer}>
-            <Animated.View style={[styles.ripple, animatedStyle]} />
-            <View style={styles.carMarker}>
-               <Ionicons name="car-sport" size={24} color="#fff" />
-            </View>
+             <Ionicons name="car" size={24} color={theme.colors.text.primary} />
           </View>
         </Marker>
-
-        {/* Nearby Sentinels */}
-        <Marker coordinate={{ latitude: -25.5430, longitude: 28.1040 }}>
-           <View style={styles.sentinelMarker}>
-             <Ionicons name="car" size={16} color={theme.colors.accent} />
-           </View>
-        </Marker>
-        <Marker coordinate={{ latitude: -25.5400, longitude: 28.0990 }}>
-           <View style={styles.sentinelMarker}>
-             <Ionicons name="car" size={16} color={theme.colors.accent} />
-           </View>
-        </Marker>
+        {/* Radar Effect around marker - This needs to be absolute positioned over the map relative to screen or marker view */}
       </MapView>
+      
+      {/* Radar Overlay Center Screen (Simplified for Demo) */}
+      <View style={styles.radarContainer}>
+         <RadarRing delay={0} />
+         <RadarRing delay={1000} />
+      </View>
 
       <SafeAreaView style={styles.overlay} pointerEvents="box-none">
         {/* Header */}
         <View style={styles.header}>
-           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-             <Ionicons name="menu-outline" size={28} color="#fff" />
-           </TouchableOpacity>
-           <Typography variant="h3" style={styles.headerTitle}>COMMUNITY SHIELD - Pretoria</Typography>
-           <View style={{ width: 28 }} />
-        </View>
-
-        {/* Alert Banner */}
-        <View style={styles.alertBanner}>
-           <Typography style={styles.alertBannerText}>THEFT IN PROGRESS - SOSHANGUVE BLOCK L</Typography>
-        </View>
-
-        {/* Spacer */}
-        <View style={{ flex: 1 }} />
-
-        {/* Bottom Info Card */}
-        <View style={styles.infoCard}>
-           <View style={styles.statusRow}>
-              <Typography style={styles.statusText}>Last Ping: 5 seconds ago</Typography>
-              <View style={styles.statusDivider} />
-              <Typography style={styles.statusText}>Speed: 45 km/h</Typography>
+           <View style={styles.menuButton}>
+             <Ionicons name="menu" size={24} color="white" />
            </View>
+           <Typography variant="h3" style={styles.headerTitle}>COMMUNITY SHIELD - Pretoria</Typography>
         </View>
 
-        {/* Bottom Actions */}
-        <View style={styles.actionContainer}>
-           <TouchableOpacity style={styles.alertButton}>
-              <Ionicons name="notifications-off-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
-              <Typography style={styles.actionButtonText}>ALERT POLICE & SENTINELS</Typography>
-           </TouchableOpacity>
-           
-           <TouchableOpacity style={styles.listenButton}>
-              <Typography style={styles.actionButtonText}>REMOTE LISTEN</Typography>
-           </TouchableOpacity>
+        {/* Theft Alert Banner */}
+        <View style={styles.alertBanner}>
+          <Typography variant="body" style={{ fontWeight: 'bold', color: 'white' }}>
+            THEFT IN PROGRESS - SOSHANGUVE BLOCK L
+          </Typography>
+        </View>
+
+        {/* Bottom Sheet Info */}
+        <View style={styles.bottomSheet}>
+          <View style={styles.infoRow}>
+            <View>
+              <Typography variant="caption" color="secondary">Last Ping: 5 seconds ago</Typography>
+              <Typography variant="body" style={{ fontWeight: 'bold' }}>Speed: 45 km/h</Typography>
+            </View>
+            <View style={styles.signalIcon}>
+              <Ionicons name="cellular" size={20} color={theme.colors.success} />
+            </View>
+          </View>
+          
+          <View style={styles.actionButtons}>
+             <Button 
+               title="ALERT POLICE & SENTINELS" 
+               variant="primary" 
+               style={{ flex: 1, marginRight: 8, backgroundColor: theme.colors.error }}
+               onPress={() => {}}
+             />
+             <Button 
+               title="REMOTE LISTEN" 
+               variant="secondary" 
+               style={{ flex: 1, marginLeft: 8, backgroundColor: theme.colors.surface }}
+               onPress={() => {}}
+             />
+          </View>
         </View>
       </SafeAreaView>
     </View>
@@ -216,133 +222,77 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   map: {
-    width: width,
-    height: height,
-    ...StyleSheet.absoluteFillObject,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.m,
-    paddingTop: theme.spacing.s,
-    backgroundColor: 'rgba(15, 23, 42, 0.8)', // Semi-transparent header
-    paddingBottom: theme.spacing.m,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 16,
-    textTransform: 'uppercase',
-  },
-  alertBanner: {
-    backgroundColor: theme.colors.error,
-    paddingVertical: theme.spacing.s,
-    paddingHorizontal: theme.spacing.m,
-    alignItems: 'center',
-    marginHorizontal: theme.spacing.m,
-    borderRadius: theme.borderRadius.s,
-    marginTop: theme.spacing.s,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  alertBannerText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-    textTransform: 'uppercase',
+    width: '100%',
+    height: '100%',
   },
   markerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 100,
-    height: 100,
-  },
-  carMarker: {
     backgroundColor: theme.colors.error,
     padding: 8,
     borderRadius: 20,
-    zIndex: 2,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: 'white',
   },
-  ripple: {
+  radarContainer: {
     position: 'absolute',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(239, 68, 68, 0.5)',
-    zIndex: 1,
-    borderWidth: 1,
-    borderColor: theme.colors.error,
+    top: '50%',
+    left: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sentinelMarker: {
-    backgroundColor: '#fff',
-    padding: 6,
-    borderRadius: 15,
+  radarRing: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     borderWidth: 2,
-    borderColor: theme.colors.accent,
+    borderColor: theme.colors.error,
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
   },
-  infoCard: {
-    backgroundColor: 'rgba(30, 41, 59, 0.9)',
-    marginHorizontal: theme.spacing.l,
-    marginBottom: theme.spacing.m,
-    padding: theme.spacing.m,
-    borderRadius: theme.borderRadius.m,
-    alignItems: 'center',
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  statusDivider: {
-    width: 1,
-    height: 14,
-    backgroundColor: '#64748b',
-    marginHorizontal: theme.spacing.m,
-  },
-  actionContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: theme.spacing.m,
-    paddingBottom: theme.spacing.m,
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'space-between',
-    gap: 12,
   },
-  alertButton: {
-    flex: 1.5,
-    backgroundColor: theme.colors.error,
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: theme.spacing.m,
-    borderRadius: theme.borderRadius.m,
-    borderBottomWidth: 4,
-    borderBottomColor: '#b91c1c', // Darker red
+    padding: theme.spacing.m,
   },
-  listenButton: {
-    flex: 1,
-    backgroundColor: theme.colors.surface,
+  menuButton: {
+    marginRight: theme.spacing.m,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 16,
+  },
+  alertBanner: {
+    backgroundColor: theme.colors.error,
+    padding: theme.spacing.s,
+    marginHorizontal: theme.spacing.m,
+    borderRadius: theme.borderRadius.m,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: theme.spacing.m,
-    borderRadius: theme.borderRadius.m,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    marginTop: theme.spacing.s,
   },
-  actionButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 12,
+  bottomSheet: {
+    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+    padding: theme.spacing.m,
+    borderTopLeftRadius: theme.borderRadius.l,
+    borderTopRightRadius: theme.borderRadius.l,
+    margin: theme.spacing.m,
+    marginBottom: theme.spacing.xl, // Space for bottom tabs
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.m,
+    paddingBottom: theme.spacing.m,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  actionButtons: {
+    flexDirection: 'row',
   },
 });

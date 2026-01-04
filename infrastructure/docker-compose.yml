@@ -33,6 +33,19 @@ services:
     networks:
       - asguard_net
 
+  backend:
+    build: ../backend
+    container_name: asguard_backend
+    environment:
+      DATABASE_URL: postgres://postgres:password@pgbouncer:6432/asguard
+      ARCJET_KEY: ${ARCJET_KEY:-aj_mock_key}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - pgbouncer
+    networks:
+      - asguard_net
+
 volumes:
   db_data:
 

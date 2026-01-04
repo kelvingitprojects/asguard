@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme';
 import { Typography } from '../components/atoms/Typography';
@@ -36,7 +36,7 @@ export const AlertsScreen = ({ navigation }) => {
       id: '4',
       type: 'update',
       title: 'UPDATE',
-      message: 'Your Sentinel Score increased! You earned R5 in data.',
+      message: 'Your Sentinel Score increased! You earned R50 in data.',
       time: '1 days ago',
       isNew: false,
     },

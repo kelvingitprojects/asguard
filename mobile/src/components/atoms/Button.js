@@ -23,7 +23,6 @@ export const Button = ({
   loading = false,
   disabled = false,
   style,
-  children,
   ...props 
 }) => {
   const getBackgroundColor = () => {
@@ -56,17 +55,13 @@ export const Button = ({
       {loading ? (
         <ActivityIndicator color={getTextColor()} />
       ) : (
-        <>
-          {children ? children : (
-            <Typography 
-              variant="button" 
-              color={variant === 'outline' || variant === 'ghost' ? 'primary' : 'primary'}
-              style={{ color: getTextColor() }}
-            >
-              {title}
-            </Typography>
-          )}
-        </>
+        <Typography 
+          variant="button" 
+          color={variant === 'outline' || variant === 'ghost' ? 'primary' : 'primary'}
+          style={{ color: getTextColor() }}
+        >
+          {title}
+        </Typography>
       )}
     </TouchableOpacity>
   );

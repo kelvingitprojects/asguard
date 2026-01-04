@@ -1,5 +1,3 @@
-import { Platform } from 'react-native';
-
 export const theme = {
   colors: {
     background: '#0f172a', // Dark Navy
@@ -64,31 +62,25 @@ export const theme = {
     round: 9999,
   },
   shadows: {
-    small: Platform.select({
-      web: { boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' },
-      default: {
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 2,
+    small: {
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
       },
-    }),
-    medium: Platform.select({
-      web: { boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.30)' },
-      default: {
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 4,
-        },
-        shadowOpacity: 0.30,
-        shadowRadius: 4.65,
-        elevation: 8,
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 2,
+    },
+    medium: {
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 4,
       },
-    }),
+      shadowOpacity: 0.30,
+      shadowRadius: 4.65,
+      elevation: 8,
+    },
   },
 };

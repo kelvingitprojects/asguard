@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
-import MapView, { Marker, Circle } from 'react-native-maps';
+import { View, StyleSheet, Dimensions, Platform, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme';
 import { Typography } from '../components/atoms/Typography';
@@ -13,6 +12,14 @@ import Animated, {
   withTiming, 
   withSequence 
 } from 'react-native-reanimated';
+
+let MapView, Marker, Circle;
+if (Platform.OS !== 'web') {
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+  Circle = Maps.Circle;
+}
 
 const { width, height } = Dimensions.get('window');
 
@@ -147,8 +154,17 @@ export const MapScreen = ({ navigation }) => {
     longitudeDelta: 0.0121,
   };
 
-  return (
-    <View style={styles.container}>
+  const renderMap = () => {
+    if (Platform.OS === 'web') {
+      return (
+        <View style={[styles.map, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#242f3e' }]}>
+          <Typography variant="h3" color="primary">Map View (Native Only)</Typography>
+          <Typography variant="body" color="secondary">Interactive maps are available on Android/iOS app.</Typography>
+        </View>
+      );
+    }
+    
+    return (
       <MapView
         style={styles.map}
         customMapStyle={DarkMapStyle}
@@ -161,6 +177,12 @@ export const MapScreen = ({ navigation }) => {
         </Marker>
         {/* Radar Effect around marker - This needs to be absolute positioned over the map relative to screen or marker view */}
       </MapView>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      {renderMap()}
       
       {/* Radar Overlay Center Screen (Simplified for Demo) */}
       <View style={styles.radarContainer}>

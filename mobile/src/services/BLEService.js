@@ -1,11 +1,28 @@
-import { BleManager } from 'react-native-ble-plx';
+import { Platform } from 'react-native';
+
+let BleManager;
+if (Platform.OS !== 'web') {
+  try {
+    BleManager = require('react-native-ble-plx').BleManager;
+  } catch (e) {
+    console.warn('Failed to load react-native-ble-plx', e);
+  }
+}
 
 class BLEService {
   constructor() {
-    this.manager = new BleManager();
+    if (Platform.OS !== 'web' && BleManager) {
+      this.manager = new BleManager();
+    } else {
+      this.manager = null;
+    }
   }
 
   startScan(onDeviceFound) {
+    if (!this.manager) {
+      console.warn('BLE not supported on this platform');
+      return;
+    }
     // Note: In a real app, you should check for permissions first
     this.manager.startDeviceScan(null, { allowDuplicates: true }, (error, device) => {
       if (error) {
@@ -19,6 +36,7 @@ class BLEService {
   }
 
   stopScan() {
+    if (!this.manager) return;
     this.manager.stopDeviceScan();
   }
 }

@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'backend/**'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -25,4 +26,4 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/asguard-backend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/asguard:backend-latest

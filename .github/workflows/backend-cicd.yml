@@ -8,9 +8,27 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  checks:
+    name: Backend Checks
     runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci --ignore-scripts
+
+  build:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    needs: checks
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
